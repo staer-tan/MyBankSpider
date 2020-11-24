@@ -12,11 +12,11 @@ public class StreamDownloader extends AbstractDownloader{
     // 设置HTTP的USER_AGENT
     private static final String USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Mobile Safari/537.36";
     // 专属COOKIE，有时效性，根据需要不断调整
-    private static final Boolean COOKIE_OPEN = true;
+    private static final Boolean COOKIE_OPEN = false;
     private static final String COOKIE = "WCCTC=347173233_1844452431_1329146189; tranCCBIBS1=DDuITL3xobU2R2BijLzqljerp6Q1XFbh9oNV4G%2CiI4eWtXKr5rJabI1vAIKZgLuhCYLtYG6hEYXZ2H4iFYBxZFjiUIT1MUqhFY; JSESSIONID=9vfzEkXMFH2C2hm52QCEhF99vWDtJawjyXtspqmDMUr1vdtm2jTP!-401670210; null=1193476874.20480.0000; ticket=; cs_cid=; custName=; userType=; lastLoginTime=; ccbcustomid=3c7aa6b3372c20c30xUFoKRsVyv1wdiXBW0L1606100883593cdaxgljY5JQGdguirb3w35ca8b32a5bf75b7ece06e81a79d9a33; ccbsessionid=lPpErjpOEYCUdFma450a9b4e307-20201123110803; cityName=%E6%B7%B1%E5%9C%B3%E5%B8%82; cityCode=440300; bankName=%E6%B7%B1%E5%9C%B3%E5%B8%82%E5%88%86%E8%A1%8C; bankCode=442000000; cityCodeFlag=2; cityCodeCustId=; tranFAVOR=O2xk48hhI2n%2CVmNQibZ%2C9mmQDb1%2CYmmQVbV%2CQmnQob9%2CrmhQIbQ%2Cjf0eJeg5MzD06t; INFO=9j9d|X7spA";
     // 设置代理IP和端口号，需要根据需要而变化
-    private static final String HOSTNAME = "60.184.192.214";
-    private static final int PORT = 4285;
+    private static final String HOSTNAME = "183.165.248.164";
+    private static final int PORT = 4242;
 
 
     public StreamDownloader(){

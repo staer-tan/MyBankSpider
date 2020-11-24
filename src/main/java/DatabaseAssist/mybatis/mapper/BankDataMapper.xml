@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="DatabaseAssist.mybatis.mapper.BankDataMapper">
+
+    <cache/>
+    <resultMap id="bankDataResultMap" type="bankData">
+        <id property="id" column="id" javaType="_int" jdbcType="NUMERIC" />
+		<result property="bankType" column="bank_Type" javaType="String" jdbcType="VARCHAR"/>
+        <result property="bankName" column="bank_name" javaType="String" jdbcType="VARCHAR"/>
+		<result property="bankLevel" column="bank_level" javaType="String" jdbcType="VARCHAR"/>
+		<result property="province" column="province" javaType="String" jdbcType="VARCHAR"/>
+		<result property="city" column="city" javaType="String" jdbcType="VARCHAR"/>
+		<result property="area" column="area" javaType="String" jdbcType="VARCHAR"/>
+		<result property="address" column="address" javaType="String" jdbcType="VARCHAR"/>
+		<result property="telephone" column="telephone" javaType="String" jdbcType="VARCHAR"/>
+		<result property="parentBank" column="parent_bank" javaType="String" jdbcType="VARCHAR"/>
+		<result property="longitudeX" column="longitudeX" javaType="String" jdbcType="VARCHAR"/>
+		<result property="latitudeY" column="latitudeY" javaType="String" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="select" resultType="bankData">
+		select * from BANKDATA where id = #{id}
+	</select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+		insert into BANKDATA (
+			bank_type,
+			bank_name,
+			bank_level,
+			province,
+			city,
+			area,
+			address,
+			telephone,
+			parent_bank,
+			longitudeX,
+			latitudeY
+		)
+		values (
+			#{bankType}
+			#{bankName},
+			#{bankLevel},
+			#{province},
+			#{city},
+			#{area},
+			#{address},
+			#{telephone},
+			#{parentBank},
+			#{longitudeX},
+			#{latitudeY}
+		)
+	</insert>
+
+    <insert id="inserts" useGeneratedKeys="true"
+            keyProperty="id" parameterType="list">
+        insert into BANKDATA (bank_type, bank_name, bank_level, province, city, area, address,
+		telephone, parent_bank, longitudeX, latitudeY) values
+        <foreach collection="list" item="element" open="(" separator="),("  close=")">
+        	#{element.bankType},
+            #{element.bankName},
+            #{element.bankLevel},
+            #{element.province},
+			#{element.city},
+			#{element.area},
+			#{element.address},
+			#{element.telephone},
+			#{element.parentBank},
+			#{element.longitudeX},
+			#{element.latitudeY}
+        </foreach>
+    </insert>
+
+</mapper>
+
+
+
+

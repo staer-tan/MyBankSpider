@@ -1,11 +1,18 @@
 package BankService;
 
+import DataObject.BankData;
+import DataService.mybatis.BankDataService;
 import MySpider.Factory.MySpiderFactory;
 import MySpider.MySpider;
+import Util.FileUtil;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 交通银行(COMM)数据爬取服务
@@ -17,7 +24,12 @@ public class BankOfCommServer {
     public void start() throws Exception {
         URL[] urls = BankOfCommServer.getBCMUrl();
         String[] allHtml = processGetStrHtml(urls);
-        BankOfCommServer.parseBCMHtml(allHtml);
+        List<BankData> list = BankOfCommServer.parseBCMHtml(allHtml);
+
+        // 同步数据至数据库中
+        BankDataService bankDataService = new BankDataService();
+        bankDataService.init();
+        bankDataService.adds(list);
     }
 
     /**
@@ -48,11 +60,14 @@ public class BankOfCommServer {
      * @param allHtml
      * @throws Exception
      */
-    public static void parseBCMHtml(String[] allHtml) throws Exception{
+    public static List<BankData> parseBCMHtml(String[] allHtml) throws Exception{
         if(allHtml == null || allHtml.length == 0){
             throw new Exception("the html is null");
         }
 
+        File destinationCCBFile = FileUtil.createEmptyFile(new URL(FileUtil.getPrefix("ProcessorData")).getPath(), "BankOfCommData");
+        RandomAccessFile randomAccessFile_write = new RandomAccessFile(destinationCCBFile, "rw");
+        List<BankData> list = new ArrayList<>();
         for(String html : allHtml){
             JSONObject jsonObject = JSONObject.parseObject(html);
 
@@ -63,12 +78,29 @@ public class BankOfCommServer {
                 JSONObject jsonObjectPData = jsonObjectData.getJSONObject(pNum);
                 String bankName = jsonObjectPData.getString("n");
                 String address = URLDecoder.decode(jsonObjectPData.getString("a"), "UTF-8") + "(" + jsonObjectPData.getString("c") + ")";
-                String longitudeX = jsonObjectPData.getString("x");
-                String latitudeY = jsonObjectPData.getString("y");
+                String longitudeX = String.valueOf((float)Math.round(jsonObjectPData.getFloat("x")*1000)/1000);
+                String latitudeY = String.valueOf((float)Math.round(jsonObjectPData.getFloat("y")*1000)/1000);
                 String telephone = URLDecoder.decode(jsonObjectPData.getString("p"), "UTF-8");
-                System.out.println(num + "\t" + bankName + "\t" + address + "\t" + longitudeX + "\t" + latitudeY + "\t" + telephone);
+
+                String content = num + "\t" + "交通银行" + bankName + "\t" + address + "\t" + longitudeX + "\t" + latitudeY + "\t" + telephone;
+
+                // 持久化至本地文件
+                randomAccessFile_write.write(content.getBytes("UTF-8"));
+                randomAccessFile_write.write("\n".getBytes("UTF-8"));
+
+                BankData bankData = new BankData();
+                bankData.setBankType("交通银行");
+                bankData.setBankName(bankName);
+                bankData.setAddress(address);
+                bankData.setLongitudeX(longitudeX);
+                bankData.setLatitudeY(latitudeY);
+                bankData.setTelephone(telephone);
+
+                // 添加到list当中用于后续持久化
+                list.add(bankData);
+
             }
         }
-
+        return list;
     }
 }
