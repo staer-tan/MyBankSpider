@@ -236,22 +236,30 @@ public class AgricultureBankOfChinaServer {
             throw new Exception("the ABC allhtml is null");
         }
 
+        File destinationCCBFile = FileUtil.createEmptyFile(new URL(FileUtil.getPrefix("ProcessorData")).getPath(), "AgricultureBankOfChinaData");
+        RandomAccessFile randomAccessFile_write = new RandomAccessFile(destinationCCBFile, "rw");
+
         for(String html : allHtml){
             JSONObject jsonObjectData = JSONObject.parseObject(html);
             JSONArray jsonArrayData = jsonObjectData.getJSONArray("BranchSearchRests");
             for(Object object : jsonArrayData){
                 JSONObject jsonObjectOne = (JSONObject) object;
                 JSONObject branchBank = jsonObjectOne.getJSONObject("BranchBank");
-                String address = branchBank.getString("Address");
                 String bankName = branchBank.getString("Name");
+                String bankLevel = branchBank.getString("BranchLevel");
+                String province = branchBank.getString("Province");
+                String city = branchBank.getString("City");
+                String address = branchBank.getString("Address");
+                String telephone = branchBank.getString("PhoneNumber");
+                String parentBank = branchBank.getString("SuperiorLevel1") + "-" + branchBank.getString("SuperiorLevel2");
                 String longitudeX = branchBank.getString("Longitude");
                 String latitudeY = branchBank.getString("Latitude");
-                String telephone = branchBank.getString("PhoneNumber");
-                String city =  branchBank.getString("City");
-                String bankLevel = branchBank.getString("BranchLevel");
-                String parentBank = branchBank.getString("SuperiorLevel1") + branchBank.getString("SuperiorLevelBranch") + branchBank.getString("SuperiorLevel2");
-                System.out.println(bankName + '\t' + bankLevel + '\t' + city + '\t' + address + '\t' + longitudeX + '\t' + latitudeY + '\t' +
-                        telephone + '\t' + parentBank);
+                String content = bankName + '\t' + bankLevel + '\t' + province + '\t' + city + '\t' + address + '\t' +
+                        telephone + '\t' + parentBank + '\t' + longitudeX + '\t' + latitudeY;
+                System.out.println(content);
+                // 写入本地文件中
+                randomAccessFile_write.write(content.getBytes("UTF-8"));
+                randomAccessFile_write.write("\n".getBytes("UTF-8"));
             }
         }
     }
