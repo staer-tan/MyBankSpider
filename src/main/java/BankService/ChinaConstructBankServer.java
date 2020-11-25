@@ -355,8 +355,4 @@ public class ChinaConstructBankServer {
         }
     }
 
-    public static void main(String[] args) {
-
-    }
-
 }

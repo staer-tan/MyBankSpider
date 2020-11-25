@@ -1,0 +1,23 @@
+CREATE DATABASE MyBankSpider;
+
+-- 银行数据表
+create table BANKDATA
+(
+    id              int             not null       AUTO_INCREMENT,
+    bank_type       VARCHAR(10)     not null,
+    bank_name       VARCHAR(50)     not null,
+    bank_level      VARCHAR(20)   ,
+    province        VARCHAR(10)   ,
+    city            VARCHAR(10)   ,
+    area            VARCHAR(10)   ,
+    address         VARCHAR(100)     not null,
+    telephone       VARCHAR(100)  ,
+    parent_bank     VARCHAR(50)   ,
+    longitudeX      VARCHAR(10)   ,
+    latitudeY       VARCHAR(10)   ,
+    primary key (id)
+) comment '新闻表' CHARSET=utf8;
+
+-- 删除银行表
+DROP TABLE BANKDATA;
+

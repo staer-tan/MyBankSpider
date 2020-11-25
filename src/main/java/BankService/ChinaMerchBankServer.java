@@ -2,9 +2,12 @@ package BankService;
 
 import MySpider.Factory.MySpiderFactory;
 import MySpider.MySpider;
+import Util.FileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +115,11 @@ public class ChinaMerchBankServer {
         return CMBAllUrl;
     }
 
-    public static void parseCMBAllHtml(String[] CMBAllHtml){
+    public static void parseCMBAllHtml(String[] CMBAllHtml) throws Exception{
+
+        File destinationCMBFile = FileUtil.createEmptyFile(new URL(FileUtil.getPrefix("ProcessorData")).getPath(), "ChinaMerchBankData");
+        RandomAccessFile randomAccessFile_write = new RandomAccessFile(destinationCMBFile, "rw");
+
         for(int i = 0; i < CMBAllHtml.length; i++){
             JSONObject jsonObject = JSONObject.parseObject(CMBAllHtml[i]);
             JSONArray dataObject = jsonObject.getJSONArray("data");
@@ -123,7 +130,9 @@ public class ChinaMerchBankServer {
                 String address = jsonObjectOne.getString("sbaddr");
                 String telephone = jsonObjectOne.getString("sbtele");
 
-                System.out.println(bankName + '\t' + address + '\t' + telephone);
+                String content = bankName + '\t' + address + '\t' + telephone;
+                randomAccessFile_write.write(content.getBytes("UTF-8"));
+                randomAccessFile_write.write("\n".getBytes("UTF-8"));
             }
         }
 

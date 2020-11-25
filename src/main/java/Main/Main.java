@@ -6,8 +6,8 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         // 中国银行
-//        BankOfChinaServer bankOfChinaServer = new BankOfChinaServer();
-//        bankOfChinaServer.start();
+        BankOfChinaServer bankOfChinaServer = new BankOfChinaServer();
+        bankOfChinaServer.start();
 
         // 交通银行
 //        BankOfCommServer bankOfCommServer = new BankOfCommServer();
@@ -27,7 +27,7 @@ public class Main {
 
 
         // 中国建设银行
-        ChinaConstructBankServer chinaConstructBankServer = new ChinaConstructBankServer();
-        chinaConstructBankServer.start();
+//        ChinaConstructBankServer chinaConstructBankServer = new ChinaConstructBankServer();
+//        chinaConstructBankServer.start();
     }
 }

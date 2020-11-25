@@ -2,9 +2,12 @@ package BankService;
 
 import MySpider.Factory.MySpiderFactory;
 import MySpider.MySpider;
+import Util.FileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;

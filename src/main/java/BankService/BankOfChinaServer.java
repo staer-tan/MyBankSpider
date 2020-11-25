@@ -1,13 +1,24 @@
 package BankService;
 
+import DataObject.BankData;
+import DataService.DataService;
+import DataService.mybatis.BankDataService;
 import MySpider.Factory.MySpiderFactory;
 import MySpider.MySpider;
+import Util.FileUtil;
+import Util.StringUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 中国银行(BOC)数据爬取服务
@@ -19,9 +30,16 @@ public class BankOfChinaServer {
     private static final String SCHEDULE_NAME = "BankOfChinaServer";
 
     public void start() throws Exception {
-        URL[] urls = getBOCUrl();
-        String[] allHtml = processGetStrHtml(urls);
-        BankOfChinaServer.parseBOCHtml(allHtml);
+        // 爬取银行数据至本地文件
+//        URL[] urls = getBOCUrl();
+//        String[] allHtml = processGetStrHtml(urls);
+//        BankOfChinaServer.parseBOCHtml(allHtml);
+
+        List<BankData> BDList = BankOfChinaServer.parseBOCLocalFile();
+        BankDataService bankDataService = new BankDataService();
+        bankDataService.init();
+        bankDataService.adds(BDList);
+
     }
 
     /**
@@ -50,6 +68,9 @@ public class BankOfChinaServer {
             throw new Exception("the html is null");
         }
 
+        File destinationCCBFile = FileUtil.createEmptyFile(new URL(FileUtil.getPrefix("ProcessorData")).getPath(), "BankOfChinaData");
+        RandomAccessFile randomAccessFile_write = new RandomAccessFile(destinationCCBFile, "rw");
+
         for(String html : allHtml){
             Document document = Jsoup.parse(html);
             Elements elements = document.select("div[class=BOC_main publish]").select("tr");
@@ -61,12 +82,47 @@ public class BankOfChinaServer {
                     continue;
                 }
                 String content = ele.text();
-                // 写入txt文件中
+                // 写入本地文件中
+                randomAccessFile_write.write(content.getBytes("UTF-8"));
+                randomAccessFile_write.write("\n".getBytes("UTF-8"));
                 System.out.println(content);
                 // 后序数据相关操作
-                String[] bankContent = content.split(" ");
 
             }
         }
     }
+
+    public static List<BankData> parseBOCLocalFile() throws Exception{
+        RandomAccessFile randomAccessFile_read = new RandomAccessFile(new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "BankOfChinaData", "rw");
+        List<BankData> BDList = new ArrayList<>();
+        String curLine = "";
+        while((curLine = randomAccessFile_read.readLine()) != null){
+            if(StringUtil.isNull(curLine)){
+                continue;
+            }
+
+            // 读取重要参数
+            String parseCurLine = new String(curLine.getBytes("ISO-8859-1"), "utf-8");
+            String[] bankContent = parseCurLine.split(" ");
+            String bankName = bankContent[0];
+            String bankLayer = bankContent[1];
+            String address = bankContent[2];
+            String telephone = bankContent[3];
+
+            System.out.println(bankName + '\t' + bankLayer + '\t' + address + '\t' + telephone);
+
+            // 数据库服务
+            BankData bankData = new BankData();
+            bankData.setBankType("中国银行");
+            bankData.setBankName(bankName);
+            bankData.setBankLevel(bankLayer);
+            bankData.setAddress(address);
+            bankData.setTelephone(telephone);
+
+            BDList.add(bankData);
+        }
+
+        return BDList;
+    }
+
 }
