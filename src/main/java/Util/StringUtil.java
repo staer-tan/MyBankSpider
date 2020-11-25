@@ -15,7 +15,7 @@ public class StringUtil {
          * 因为SimpleDateFormat是非线程安全的
          * 不过由于我这里每次都会new一个新的SimpleDateFormat实例,所以不会发生线程安全问题
          */
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmssZ");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmZ");
 
         Date date = new Date();
 

@@ -1,15 +1,23 @@
 package BankService;
 
+import DataObject.BankData;
+import DataService.mybatis.BankDataService;
 import MySpider.Factory.MySpiderFactory;
 import MySpider.MySpider;
+import Util.AddressService.gaoDeServer;
+import Util.FileUtil;
+import Util.StringUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 邮政储蓄银行(PSBC)数据爬取服务
@@ -20,23 +28,31 @@ public class PostSavBankOfChinaServer {
     public static final String SCHEDULE_NAME = "PostSavBankOfChinaServer";
 
     public void start() throws Exception {
-        // 从省份开始得到所有省份的URL和HTML
-        URL[] provinceUrl = PostSavBankOfChinaServer.getPSBCProvinceUrl();
-        String[] provinceStrHtml = processGetStrHtml(provinceUrl);
-        System.out.println("省份数目：" + provinceStrHtml.length);
+        String filePath = new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "PostSavBankOfChinaData";
+        File newFile = new File(filePath);
+        if(!newFile.exists()){
+            // 从省份开始得到所有省份的URL和HTML
+            URL[] provinceUrl = PostSavBankOfChinaServer.getPSBCProvinceUrl();
+            String[] provinceStrHtml = processGetStrHtml(provinceUrl);
+            System.out.println("省份数目：" + provinceStrHtml.length);
 
-        // 从省份的HTML得到城市URL和HTML
-        URL[] cityUrl = PostSavBankOfChinaServer.getPSBCCityUrl(provinceStrHtml);
-        String[] cityStrHtml = processGetStrHtml(cityUrl);
-        System.out.println("城市数目：" + cityStrHtml.length);
+            // 从省份的HTML得到城市URL和HTML
+            URL[] cityUrl = PostSavBankOfChinaServer.getPSBCCityUrl(provinceStrHtml);
+            String[] cityStrHtml = processGetStrHtml(cityUrl);
+            System.out.println("城市数目：" + cityStrHtml.length);
 
-        // 从城市的HTML得到各区县的URL和HTML
-        URL[] areaUrl = PostSavBankOfChinaServer.getPSBCAreaUrl(cityStrHtml);
-        String[] areaStrHtml = processGetStrHtml(areaUrl);
-        System.out.println("区县数目：" + areaStrHtml.length);
+            // 从城市的HTML得到各区县的URL和HTML
+            URL[] areaUrl = PostSavBankOfChinaServer.getPSBCAreaUrl(cityStrHtml);
+            String[] areaStrHtml = processGetStrHtml(areaUrl);
+            System.out.println("区县数目：" + areaStrHtml.length);
 
-        // 打印/处理该Html中相关内容
-        parsePSBSAllUrl(areaStrHtml);
+            // 打印/处理该Html中相关内容
+            parsePSBSAllUrl(areaStrHtml);
+        }
+
+        PostSavBankOfChinaServer.parsePSBCLocalFile(filePath);
+
+
     }
 
     /**
@@ -157,10 +173,64 @@ public class PostSavBankOfChinaServer {
 
             for (Element element : elements) {
                 String title = element.text();
-                String[] bankObject = title.split(" ");
                 System.out.println(title);
             }
         }
+    }
+
+    /**
+     * 从本地保存的文件读取数据
+     *
+     * @param path 保存路径
+     * @return List封装的银行数据对象
+     * @throws Exception
+     */
+    public static void parsePSBCLocalFile(String path) throws Exception {
+        RandomAccessFile randomAccessFile_read = new RandomAccessFile(path, "rw");
+        String curLine = "";
+        BankDataService bankDataService = new BankDataService();
+        bankDataService.init();
+
+        while ((curLine = randomAccessFile_read.readLine()) != null) {
+            if (StringUtil.isNull(curLine)) {
+                continue;
+            }
+
+            // 读取重要参数
+            String parseCurLine = new String(curLine.getBytes("ISO-8859-1"), "utf-8");
+            if(parseCurLine.contains("网点名称")){
+                continue;
+            }
+
+            String[] bankContent = parseCurLine.split(" ");
+            String bankName = bankContent[0];
+            String address = bankContent[1];
+            String telephone = bankContent[3];
+
+            System.out.println(bankName + '\t' + address + '\t' + telephone);
+
+            // 使用地址解析或API查询得到更丰富信息
+            String searchAddress = bankName + address;
+            Map<String, String> map = gaoDeServer.parseAddress(searchAddress);
+            if(map == null || map.size() == 0){
+                continue;
+            }
+
+            BankData bankData = new BankData();
+            bankData.setBankType("邮政储蓄银行");
+            bankData.setBankName(bankName);
+            bankData.setProvince(map.get("province"));
+            bankData.setCity(map.get("city"));
+            bankData.setArea(map.get("district"));
+            bankData.setAddress(address);
+            bankData.setTelephone(telephone);
+            bankData.setLongitudeX(map.get("longitudeX"));
+            bankData.setLatitudeY(map.get("latitudeY"));
+
+            bankDataService.add(bankData);
+        }
+
+        return;
     }
 
 }

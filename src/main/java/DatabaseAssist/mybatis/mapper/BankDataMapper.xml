@@ -38,7 +38,7 @@
 			latitudeY
 		)
 		values (
-			#{bankType}
+			#{bankType},
 			#{bankName},
 			#{bankLevel},
 			#{province},

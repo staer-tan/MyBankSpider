@@ -93,7 +93,7 @@ public class MySpider {
             strHtml[temp++] = processor.parseToBankFile(downloadFile);
             System.out.println(strHtml[temp - 1]);
 
-            Thread.sleep(50 * 6);
+            Thread.sleep(50);
             if(temp % 5 == 0){
                 System.out.println(temp);
             }

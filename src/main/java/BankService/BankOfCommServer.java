@@ -4,6 +4,7 @@ import DataObject.BankData;
 import DataService.mybatis.BankDataService;
 import MySpider.Factory.MySpiderFactory;
 import MySpider.MySpider;
+import Util.AddressService.gaoDeServer;
 import Util.FileUtil;
 import com.alibaba.fastjson.JSONObject;
 
@@ -12,7 +13,9 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 交通银行(COMM)数据爬取服务
@@ -88,13 +91,23 @@ public class BankOfCommServer {
                 randomAccessFile_write.write(content.getBytes("UTF-8"));
                 randomAccessFile_write.write("\n".getBytes("UTF-8"));
 
+                // 使用地址解析或API查询得到更丰富信息
+                String searchAddress = bankName + address;
+                Map<String, String> map = gaoDeServer.parseAddress(searchAddress);
+                if(map == null || map.size() == 0){
+                    continue;
+                }
+
                 BankData bankData = new BankData();
                 bankData.setBankType("交通银行");
                 bankData.setBankName(bankName);
+                bankData.setProvince(map.get("province"));
+                bankData.setCity(map.get("city"));
+                bankData.setArea(map.get("district"));
                 bankData.setAddress(address);
+                bankData.setTelephone(telephone);
                 bankData.setLongitudeX(longitudeX);
                 bankData.setLatitudeY(latitudeY);
-                bankData.setTelephone(telephone);
 
                 // 添加到list当中用于后续持久化
                 list.add(bankData);
@@ -103,4 +116,5 @@ public class BankOfCommServer {
         }
         return list;
     }
+
 }

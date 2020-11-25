@@ -1,8 +1,12 @@
 package BankService;
 
+import DataObject.BankData;
+import DataService.mybatis.BankDataService;
 import MySpider.Factory.MySpiderFactory;
 import MySpider.MySpider;
+import Util.AddressService.gaoDeServer;
 import Util.FileUtil;
+import Util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -11,6 +15,7 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 中国农业银行(ABC)数据爬取服务
@@ -20,27 +25,35 @@ public class AgricultureBankOfChinaServer {
     public static final String SCHEDULE_NAME = "AgricultureBankOfChinaServer";
 
     public void start() throws Exception{
-        // 从省份的URL获取省份码
-        URL[] provinceCodeUrl = getABCProvinceCodeUrl();
-        String[] provinceCodeHtml = processGetStrHtml(provinceCodeUrl);
-        String[] provinceCode = parseABCProvinceCodeHtml(provinceCodeHtml);
+        String filePath = new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "AgricultureBankOfChinaData";
+        File newFile = new File(filePath);
+        if(!newFile.exists()){
+            // 从省份的URL获取省份码
+            URL[] provinceCodeUrl = getABCProvinceCodeUrl();
+            String[] provinceCodeHtml = processGetStrHtml(provinceCodeUrl);
+            String[] provinceCode = parseABCProvinceCodeHtml(provinceCodeHtml);
 
-        // 从省份的URL获取城市码
-        URL[] cityCodeUrl = getABCCityCodeUrl(provinceCode);
-        String[] cityCodeHtml = processGetStrHtml(cityCodeUrl);
-        String[] cityCode = parseABCCityCodeHtml(cityCodeHtml);
+            // 从省份的URL获取城市码
+            URL[] cityCodeUrl = getABCCityCodeUrl(provinceCode);
+            String[] cityCodeHtml = processGetStrHtml(cityCodeUrl);
+            String[] cityCode = parseABCCityCodeHtml(cityCodeHtml);
 
-        // 从城市的URL获取区县码
-        URL[] areaCodeUrl = getABCAreaCodeUrl(cityCode);
-        String[] areaCodeHtml = processGetStrHtml(areaCodeUrl);
-        String[] areaCode = parseABCAreaCodeHtml(areaCodeHtml);
+            // 从城市的URL获取区县码
+            URL[] areaCodeUrl = getABCAreaCodeUrl(cityCode);
+            String[] areaCodeHtml = processGetStrHtml(areaCodeUrl);
+            String[] areaCode = parseABCAreaCodeHtml(areaCodeHtml);
 
-        // 根据最底层区县码（获得所有URL）
-        URL[] allCodeUrl = getABCAllCodeUrl(areaCode);
-        String[] allCodeHtml = processGetStrHtml(allCodeUrl);
+            // 根据最底层区县码（获得所有URL）
+            URL[] allCodeUrl = getABCAllCodeUrl(areaCode);
+            String[] allCodeHtml = processGetStrHtml(allCodeUrl);
 
-        // 根据HTML进行数据解析
-        parseABCAllHtml(allCodeHtml);
+            // 根据HTML进行数据解析
+            parseABCAllHtml(allCodeHtml);
+        }
+        // 由于农业银行数据众多，直接逐个插入
+       AgricultureBankOfChinaServer.parseABCLocalFile(filePath);
+
+
     }
 
     /**
@@ -262,5 +275,59 @@ public class AgricultureBankOfChinaServer {
                 randomAccessFile_write.write("\n".getBytes("UTF-8"));
             }
         }
+    }
+
+    /**
+     * 从本地保存的文件读取数据
+     *
+     * @param path 保存路径
+     * @return List封装的银行数据对象
+     * @throws Exception
+     */
+    public static void parseABCLocalFile(String path) throws Exception {
+        RandomAccessFile randomAccessFile_read = new RandomAccessFile(path, "rw");
+        String curLine = "";
+        BankDataService bankDataService = new BankDataService();
+        bankDataService.init();
+        while ((curLine = randomAccessFile_read.readLine()) != null) {
+            if (StringUtil.isNull(curLine)) {
+                continue;
+            }
+
+            // 读取重要参数
+            String parseCurLine = new String(curLine.getBytes("ISO-8859-1"), "utf-8");
+            String[] bankContent = parseCurLine.split("\t");
+            String bankName = bankContent[0];
+            String bankLevel = bankContent[1];
+            String address = bankContent[4];
+            String telephone = bankContent[5];
+            String parentBank = bankContent[6];
+            String longitudeX = bankContent[7];
+            String latitudeY = bankContent[8];
+
+            // 使用地址解析或API查询得到更丰富信息
+            String searchAddress = bankName + address;
+            Map<String, String> map = gaoDeServer.parseAddress(searchAddress);
+            if(map == null || map.size() == 0){
+                continue;
+            }
+
+            BankData bankData = new BankData();
+            bankData.setBankType("中国农业银行");
+            bankData.setBankName(bankName);
+            bankData.setBankLevel(bankLevel);
+            bankData.setProvince(map.get("province"));
+            bankData.setCity(map.get("city"));
+            bankData.setArea(map.get("district"));
+            bankData.setAddress(address);
+            bankData.setTelephone(telephone);
+            bankData.setParentBank(parentBank);
+            bankData.setLongitudeX(longitudeX);
+            bankData.setLatitudeY(latitudeY);
+
+            bankDataService.add(bankData);
+        }
+
+
     }
 }
