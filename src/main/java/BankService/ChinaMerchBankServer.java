@@ -53,7 +53,7 @@ public class ChinaMerchBankServer {
     }
 
     public static String[] processGetStrHtml(URL[] urls) throws Exception {
-        MySpider mySpider = MySpiderFactory.getBankDataSpiderNoDataService(urls, SCHEDULE_NAME);
+        MySpider mySpider = MySpiderFactory.getBankDataSpiderService(urls, SCHEDULE_NAME);
         String[] strHtml = mySpider.startGetStrHtml();
         return strHtml;
     }

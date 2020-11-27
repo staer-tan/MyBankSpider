@@ -1,7 +1,10 @@
 package BankService;
 
+import DataObject.BankData;
+import DataService.mybatis.BankDataService;
 import MySpider.Factory.MySpiderFactory;
 import MySpider.MySpider;
+import Util.AddressService.gaoDeServer;
 import Util.FileUtil;
 import Util.StringUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -12,6 +15,7 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 中国建设银行(CCB)数据服务
@@ -24,31 +28,38 @@ public class ChinaConstructBankServer {
     // 1. 从省份 -> 城市 -> 区县，把区县及分页的所有URL保存到文件中
     // 2. 根据保存在文件中的URL，来读取解析
     public void start() throws Exception {
-        /**
-         * 1. 步骤1：把所有URL地址放到AllURL中
-         */
-        // 从省份的URL获取省份码
-        URL[] provinceCodeUrl = ChinaConstructBankServer.getCCBProvinceCodeUrl();
-        String[] provinceCodeHtml = processGetStrHtml(provinceCodeUrl);
-        String[] provinceCode = ChinaConstructBankServer.parseCCBProvinceCodeHtml(provinceCodeHtml);
+        String filePath = new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "ChinaConstructBankData";
+        File newFile = new File(filePath);
+        if(!newFile.exists()) {
 
-        // 从省份码获取市级URL，得到市级HTML和市级码
-        URL[] cityCodeUrl = ChinaConstructBankServer.getCCBCityCodeUrl(provinceCode);
-        String[] cityCodeHtml = processGetStrHtml(cityCodeUrl);
-        String[] cityCode = ChinaConstructBankServer.parseCCBCityCodeHtml(cityCodeHtml);
+            /**
+             * 1. 步骤1：把所有URL地址放到AllURL中
+             */
+            // 从省份的URL获取省份码
+//        URL[] provinceCodeUrl = ChinaConstructBankServer.getCCBProvinceCodeUrl();
+//        String[] provinceCodeHtml = processGetStrHtml(provinceCodeUrl);
+//        String[] provinceCode = ChinaConstructBankServer.parseCCBProvinceCodeHtml(provinceCodeHtml);
+//
+//        // 从省份码获取市级URL，得到市级HTML和市级码
+//        URL[] cityCodeUrl = ChinaConstructBankServer.getCCBCityCodeUrl(provinceCode);
+//        String[] cityCodeHtml = processGetStrHtml(cityCodeUrl);
+//        String[] cityCode = ChinaConstructBankServer.parseCCBCityCodeHtml(cityCodeHtml);
+//
+//        // // 从城市的URL获取区县码
+//        URL[] areaCodeUrl = ChinaConstructBankServer.getCCBAreaCodeUrl(cityCode);
+//        String[] areaCodeHtml = processGetStrHtml(areaCodeUrl);
+//        String[] areaCode = ChinaConstructBankServer.parseCCBAreaCodeHtml(areaCodeHtml);
+//        ChinaConstructBankServer.getCCBAllCodeUrl();
 
-        // // 从城市的URL获取区县码
-        URL[] areaCodeUrl = ChinaConstructBankServer.getCCBAreaCodeUrl(cityCode);
-        String[] areaCodeHtml = processGetStrHtml(areaCodeUrl);
-        String[] areaCode = ChinaConstructBankServer.parseCCBAreaCodeHtml(areaCodeHtml);
-        URL[] allUrl = ChinaConstructBankServer.getCCBAllCodeUrl(areaCode);
+            /**
+             * 2. 步骤2：从文件解析URL进行爬取
+             */
+//        URL[] allUrlFromFile = ChinaConstructBankServer.getCCBAllCodeUrlFromFile();
+//        String[] allHtml = processGetStrHtml(allUrlFromFile);
+//        parseAllUrl(allHtml);
+        }
 
-        /**
-         * 2. 步骤2：从文件解析URL进行爬取
-         */
-        URL[] allUrlFromFile = ChinaConstructBankServer.getCCBAllCodeUrlFromFile();
-        String[] allHtml = processGetStrHtml(allUrlFromFile);
-        parseAllUrl(allHtml);
+        ChinaConstructBankServer.parseCCBCLocalFile(filePath);
     }
 
     /**
@@ -59,7 +70,7 @@ public class ChinaConstructBankServer {
      * @throws Exception
      */
     public static String[] processGetStrHtml(URL[] urls) throws Exception {
-        MySpider mySpider = MySpiderFactory.getBankDataSpiderNoDataService(urls, SCHEDULE_NAME);
+        MySpider mySpider = MySpiderFactory.getBankDataSpiderService(urls, SCHEDULE_NAME);
         String[] strHtml = mySpider.startGetStrHtml();
         return strHtml;
     }
@@ -117,25 +128,28 @@ public class ChinaConstructBankServer {
         return areaUrl;
     }
 
+
+
     /**
      * 根据区县码获取所有的URL地址
      *
-     * @param areaCode
      * @return
      * @throws Exception
      */
-    public static URL[] getCCBAllCodeUrl(String[] areaCode) throws Exception {
-        if (areaCode == null || areaCode.length == 0) {
-            throw new Exception("areaCode is null");
-        }
-
-        List<URL> urlList = new ArrayList<>();
+    public static void getCCBAllCodeUrl() throws Exception {
+        RandomAccessFile randomAccessFile_read = new RandomAccessFile(new URL(FileUtil.getPrefix("ProcessorTmp")).getPath() + "ChinaConstructBankAreaCode", "rw");
         // 由于建设银行的cookie时效性问题，直接把最终的URL存到文件中
-        File destinationCCBFile = FileUtil.createEmptyFile(new URL(FileUtil.getPrefix("ProcessorTmp")).getPath(), "ChinaConstructBankAllUrl");
+        File destinationCCBFile = new File(new URL(FileUtil.getPrefix("ProcessorTmp")).getPath() + File.separator + "ChinaConstructBankAllUrl");
         RandomAccessFile randomAccessFile_write = new RandomAccessFile(destinationCCBFile, "rw");
-        for (int i = 0; i < areaCode.length; i++) {
+        randomAccessFile_write.seek(randomAccessFile_write.length());
+        String areaCode = "";
+        while((areaCode = randomAccessFile_read.readLine()) != null) {
+            if (StringUtil.isNull(areaCode)) {
+                continue;
+            }
+
             URL[] url = new URL[1];
-            url[0] = new URL("http://www.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&isAjaxRequest=true&TXCODE=NZX010&ADiv_Cd=" + areaCode[i] + "&Kywd_List_Cntnt=&Enqr_MtdCd=4&PAGE=1&Cur_StCd=4");
+            url[0] = new URL("http://www.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&isAjaxRequest=true&TXCODE=NZX010&ADiv_Cd=" + areaCode + "&Kywd_List_Cntnt=&Enqr_MtdCd=4&PAGE=1&Cur_StCd=4");
             String[] totalPageHtml = processGetStrHtml(url);
             String totalPage = parseTotalPage(totalPageHtml);
             if (totalPage == null || totalPage.equals("0")) {
@@ -143,20 +157,12 @@ public class ChinaConstructBankServer {
             }
             int totalPages = Integer.parseInt(totalPage);
             for (int page = 1; page <= totalPages; page++) {
-                String curUrl = "http://www.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&isAjaxRequest=true&TXCODE=NZX010&ADiv_Cd=" + areaCode[i] + "&Kywd_List_Cntnt=&Enqr_MtdCd=4&PAGE=" + page + "&Cur_StCd=4";
+                String curUrl = "http://www.ccb.com/tran/WCCMainPlatV5?CCB_IBSVersion=V5&SERVLET_NAME=WCCMainPlatV5&isAjaxRequest=true&TXCODE=NZX010&ADiv_Cd=" + areaCode + "&Kywd_List_Cntnt=&Enqr_MtdCd=4&PAGE=" + page + "&Cur_StCd=4";
                 randomAccessFile_write.write(curUrl.getBytes("UTF-8"));
                 randomAccessFile_write.write("\n".getBytes("UTF-8"));
-
-                urlList.add(new URL(curUrl));
             }
-        }
 
-        URL[] allUrl = new URL[urlList.size()];
-        for (int i = 0; i < urlList.size(); i++) {
-            allUrl[i] = urlList.get(i);
         }
-
-        return allUrl;
     }
 
     /**
@@ -165,7 +171,7 @@ public class ChinaConstructBankServer {
      * @throws Exception
      */
     public static URL[] getCCBAllCodeUrlFromFile() throws Exception {
-        RandomAccessFile randomAccessFile_read = new RandomAccessFile(new URL(FileUtil.getPrefix("ProcessorTmp")).getPath() + "ChinaConstructBankAllUrl", "rw");
+        RandomAccessFile randomAccessFile_read = new RandomAccessFile(new URL(FileUtil.getPrefix("ProcessorTmp")).getPath() + "ChinaConstructBankAllUrl8", "rw");
         String curLine = "";
         List<URL> urlList = new ArrayList<>();
         while((curLine = randomAccessFile_read.readLine()) != null){
@@ -270,6 +276,9 @@ public class ChinaConstructBankServer {
             throw new Exception("the CCB area html is null");
         }
 
+        File destinationCCBFile = FileUtil.createEmptyFile(new URL(FileUtil.getPrefix("ProcessorTmp")).getPath(), "ChinaConstructBankAreaCode");
+        RandomAccessFile randomAccessFile_write = new RandomAccessFile(destinationCCBFile, "rw");
+
         List<String> listAreaCode = new ArrayList<>();
         for (String areaCodeHtml : html) {
             JSONObject jsonObject = JSONObject.parseObject(areaCodeHtml);
@@ -288,6 +297,8 @@ public class ChinaConstructBankServer {
         for (int i = 0; i < listAreaCode.size(); i++) {
             areaCode[i] = listAreaCode.get(i);
             System.out.println(areaCode[i]);
+            randomAccessFile_write.write(areaCode[i].getBytes("UTF-8"));
+            randomAccessFile_write.write("\n".getBytes("UTF-8"));
         }
         System.out.println(listAreaCode.size());
 
@@ -334,6 +345,10 @@ public class ChinaConstructBankServer {
             throw new Exception("the CCB all url html is null");
         }
 
+        File destinationCCBFile = new File(new URL(FileUtil.getPrefix("ProcessorData")).getPath() + File.separator + "ChinaConstructBankData");
+        RandomAccessFile randomAccessFile_write = new RandomAccessFile(destinationCCBFile, "rw");
+        randomAccessFile_write.seek(randomAccessFile_write.length());
+
         for (String areaCodeHtml : html) {
             JSONObject jsonObject = JSONObject.parseObject(areaCodeHtml);
             JSONArray jsonArrayData = jsonObject.getJSONArray("OUTLET_DTL_LIST");
@@ -346,12 +361,69 @@ public class ChinaConstructBankServer {
                     String telephone = jsonObjectOne.getString("Fix_TelNo");
                     String longitudeX = jsonObjectOne.getString("Lgt");
                     String latitudeY = jsonObjectOne.getString("Ltt");
-                    if (bankName != null) {
-                        System.out.println(bankName + '\t' + address + '\t' + telephone + '\t' + longitudeX + '\t' + latitudeY);
+                    if (bankName == null) {
+                        continue;
                     }
+                    String content = bankName + '\t' + address + '\t' + telephone + '\t' + longitudeX + '\t' + latitudeY;
+                    randomAccessFile_write.write(content.getBytes("UTF-8"));
+                    randomAccessFile_write.write("\n".getBytes("UTF-8"));
                 }
             }
         }
+    }
+
+    /**
+     * 从本地保存的文件读取数据
+     *
+     * @param path 保存路径
+     * @return List封装的银行数据对象
+     * @throws Exception
+     */
+    public static void parseCCBCLocalFile(String path) throws Exception {
+        RandomAccessFile randomAccessFile_read = new RandomAccessFile(path, "rw");
+        String curLine = "";
+        BankDataService bankDataService = new BankDataService();
+        bankDataService.init();
+
+        while ((curLine = randomAccessFile_read.readLine()) != null) {
+            if (StringUtil.isNull(curLine)) {
+                continue;
+            }
+
+            // 读取重要参数
+            String parseCurLine = new String(curLine.getBytes("ISO-8859-1"), "utf-8");
+
+            String[] bankContent = parseCurLine.split("\t");
+            String bankName = bankContent[0];
+            String address = bankContent[1];
+            String telephone = bankContent[2];
+            String longitudeX = String.valueOf((float)Math.round(Float.parseFloat(bankContent[3])*1000)/1000);
+            String latitudeY = String.valueOf((float)Math.round(Float.parseFloat(bankContent[4])*1000)/1000);
+
+            String content = bankName + '\t' + address + '\t' + telephone + '\t' + longitudeX + '\t' + latitudeY;
+            System.out.println(content);
+            // 使用地址解析或API查询得到更丰富信息
+            String searchAddress = bankName + address;
+            Map<String, String> map = gaoDeServer.parseAddress(searchAddress);
+            if(map == null || map.size() == 0){
+                continue;
+            }
+
+            BankData bankData = new BankData();
+            bankData.setBankType("中国建设银行");
+            bankData.setBankName(bankName);
+            bankData.setProvince(map.get("province"));
+            bankData.setCity(map.get("city"));
+            bankData.setArea(map.get("district"));
+            bankData.setAddress(address);
+            bankData.setTelephone(telephone);
+            bankData.setLongitudeX(longitudeX);
+            bankData.setLatitudeY(latitudeY);
+
+            bankDataService.add(bankData);
+        }
+
+        return;
     }
 
 }

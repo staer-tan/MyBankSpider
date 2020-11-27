@@ -57,13 +57,13 @@ public class AgricultureBankOfChinaServer {
     }
 
     /**
-     * 根据URL链接返回String类型的html
+     * 根据URL链接返回String类型的html,可使用多线程版本替换
      * @param urls
      * @return
      * @throws Exception
      */
     public static String[] processGetStrHtml(URL[] urls) throws Exception{
-        MySpider mySpider =  MySpiderFactory.getBankDataSpiderNoDataService(urls, SCHEDULE_NAME);
+        MySpider mySpider =  MySpiderFactory.getBankDataSpiderService(urls, SCHEDULE_NAME);
         String[] strHtml = mySpider.startGetStrHtml();
         return strHtml;
     }

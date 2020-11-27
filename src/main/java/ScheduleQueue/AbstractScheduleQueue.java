@@ -5,7 +5,7 @@ import java.util.Queue;
 
 public abstract class AbstractScheduleQueue implements ScheduleQueue {
     protected Queue<URL> queue;
-    protected int maxCapacity = 3500;
+    protected int maxCapacity = 8000;
 
     @Override
     public int size() {

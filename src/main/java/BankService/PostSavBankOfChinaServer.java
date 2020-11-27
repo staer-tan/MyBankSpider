@@ -63,7 +63,7 @@ public class PostSavBankOfChinaServer {
      * @throws Exception
      */
     public static String[] processGetStrHtml(URL[] urls) throws Exception {
-        MySpider mySpider = MySpiderFactory.getBankDataSpiderNoDataService(urls, SCHEDULE_NAME);
+        MySpider mySpider = MySpiderFactory.getBankDataSpiderService(urls, SCHEDULE_NAME);
         String[] strHtml = mySpider.startGetStrHtml();
         return strHtml;
     }
@@ -205,7 +205,8 @@ public class PostSavBankOfChinaServer {
             String[] bankContent = parseCurLine.split(" ");
             String bankName = bankContent[0];
             String address = bankContent[1];
-            String telephone = bankContent[3];
+            String telephone = bankContent[bankContent.length - 1];
+
 
             System.out.println(bankName + '\t' + address + '\t' + telephone);
 

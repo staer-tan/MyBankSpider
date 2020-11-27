@@ -13,7 +13,6 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +41,7 @@ public class BankOfCommServer {
      * @throws Exception
      */
     public static String[] processGetStrHtml(URL[] urls) throws Exception{
-        MySpider mySpider =  MySpiderFactory.getBankDataSpiderNoDataService(urls, SCHEDULE_NAME);
+        MySpider mySpider =  MySpiderFactory.getBankDataSpiderService(urls, SCHEDULE_NAME);
         String[] strHtml = mySpider.startGetStrHtml();
         return strHtml;
     }

@@ -1,0 +1,164 @@
+create table supTable
+(
+    id              int             not null       AUTO_INCREMENT,
+    bank_type       VARCHAR(10)     not null,
+    bank_name       VARCHAR(50)     not null,
+    bank_level      VARCHAR(20)   ,
+    province        VARCHAR(20)   ,
+    city            VARCHAR(20)   ,
+    area            VARCHAR(30)   ,
+    address         VARCHAR(100)     not null,
+    telephone       VARCHAR(100)  ,
+    parent_bank     VARCHAR(50)   ,
+    longitudeX      VARCHAR(10)   ,
+    latitudeY       VARCHAR(10)   ,
+    primary key (id)
+) comment '新闻表' CHARSET=utf8;
+
+SELECT * from supTable
+
+DROP TABLE supTable;
+
+insert into supTable select * from bankdata;
+
+-- 字符抽取方式
+SELECT id, bank_name FROM (SELECT id, bank_name, RIGHT(bd.bank_name,6) as bank FROM supTable bd where bank_type = "交通银行")
+	as A where bank = "市分行营业部"
+
+
+
+-- 交通银行（完成，完成）
+-- 1. 全局匹配
+SELECT * FROM supTable where bank_type = "交通银行"
+
+
+-- 交通银行使用like进行匹配
+SELECT * FROM supTable where bank_type = "交通银行" and bank_name like "%省分行%"
+
+
+-- 交通银行根据select的id进行update
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "交通银行" and bank_name like "%省分行%") selTable
+			on selTable.id = supTable.id set supTable.bank_level = "一级分行";
+
+-- 交通银行寻求父节点
+
+SELECT * FROM supTable where bank_type = "交通银行" and bank_level = "一级分行"
+
+SELECT * FROM supTable where bank_type = "交通银行" and bank_level = "二级分行"
+
+SELECT * FROM supTable where bank_type = "交通银行" and bank_level = "支行"
+
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "交通银行" and bank_level = "支行") selTable
+			on selTable.id = supTable.id set supTable.parent_bank = CONCAT(supTable.city, "分行") ;
+
+-- 中国银行（自带完成, 完成）
+SELECT * FROM supTable where bank_type = "中国银行"
+
+-- 更新parent_bank
+
+SELECT * FROM supTable where bank_type = "中国银行" and bank_level = "一级分行"
+
+SELECT * FROM supTable where bank_type = "中国银行" and bank_level = "二级分行"
+
+SELECT * FROM supTable where bank_type = "中国银行" and bank_level = "支行"
+
+SELECT * FROM supTable where bank_type = "中国银行" and city = "[]"
+
+update supTable sup set sup.city = sup.area where city = "[]"
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "中国银行" and bank_level = "支行") selTable
+			on selTable.id = supTable.id set supTable.parent_bank = CONCAT(supTable.city, "分行") ;
+
+
+
+-- 招商银行(共1682）
+
+-- 支行(1535)
+-- 分行营业部（137）
+-- 分行（1）
+-- 总行（1）
+
+SELECT * FROM supTable where bank_type = "招商银行"
+
+SELECT * FROM supTable where bank_type = "招商银行" and bank_level = "一级分行"
+
+SELECT * FROM supTable where bank_type = "招商银行" and bank_level = "二级分行"
+
+SELECT * FROM supTable where bank_type = "招商银行" and bank_level = "支行"
+
+SELECT * FROM supTable where bank_type = "招商银行" and bank_name REGEXP '[分]'
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "招商银行" and bank_name like "%支行") selTable
+			on selTable.id = supTable.id set supTable.bank_level = "支行";
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "招商银行" and bank_name REGEXP '[总]') selTable
+			on selTable.id = supTable.id set supTable.bank_level = "一级分行";
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "招商银行" and bank_level = "支行") selTable
+			on selTable.id = supTable.id set supTable.parent_bank = CONCAT(supTable.city, "分行");
+
+
+-- 中国农业银行（自带完成）
+
+SELECT * FROM supTable where bank_type = "中国农业银行"
+
+-- 邮政储蓄银行
+
+-- 一级分行：省/区/直属支行
+
+-- 二级分行：市/区分行
+
+-- 支行：营业所/支行（16974，等价支行）
+
+SELECT * FROM supTable
+
+SELECT * FROM supTable where bank_type = "邮政储蓄银行" and bank_name like "%分行直属支行%"
+
+SELECT * FROM supTable where bank_type = "邮政储蓄银行" and bank_level = "二级分行"
+
+SELECT * FROM supTable where bank_type = "邮政储蓄银行" and bank_name like "%营业所%"
+
+
+SELECT * FROM supTable where bank_type = "邮政储蓄银行" and bank_level like "%支行%"
+
+SELECT * FROM supTable where bank_type = "邮政储蓄银行" and city = "[]"
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "邮政储蓄银行" and bank_level like "%一级分行%") selTable
+			on selTable.id = supTable.id set supTable.parent_bank = CONCAT(supTable.province, "分行");
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "邮政储蓄银行" and bank_level like "%营业所%") selTable
+			on selTable.id = supTable.id set supTable.parent_bank = CONCAT(supTable.city, "分行");
+
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "邮政储蓄银行" and bank_level like "%二级分行%") selTable
+			on selTable.id = supTable.id set supTable.parent_bank = CONCAT(supTable.province, "分行");
+
+-- 中国建设银行
+insert into supTable (select * from bankdata where bank_type = "中国建设银行");
+
+select * from supTable where bank_type = "中国建设银行"
+
+SELECT * FROM supTable where bank_type = "中国建设银行" and bank_name like "%支行%"
+
+SELECT * FROM supTable
+
+-- 建设银行银行等级
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "中国建设银行" and bank_name like "%分理处%") selTable
+			on selTable.id = supTable.id set supTable.bank_level = "分理处";
+
+update supTable inner join
+		(SELECT id, bank_name FROM supTable where bank_type = "中国建设银行" and bank_level like "%分理处%") selTable
+			on selTable.id = supTable.id set supTable.parent_bank = CONCAT(supTable.city, "分行");
+

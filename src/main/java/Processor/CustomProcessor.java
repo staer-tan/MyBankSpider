@@ -24,7 +24,7 @@ public class CustomProcessor extends AbstractProcessor{
      */
 
     public static String[] processGetStrHtml(URL[] urls, String ScheduleName) throws Exception{
-        MySpider mySpider =  MySpiderFactory.getBankDataSpiderNoDataService(urls, ScheduleName);
+        MySpider mySpider =  MySpiderFactory.getBankDataSpiderService(urls, ScheduleName);
         String[] strHtml = mySpider.startGetStrHtml();
         return strHtml;
     }

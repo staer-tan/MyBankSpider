@@ -14,8 +14,8 @@ public class Main {
 //        bankOfCommServer.start();
 
         // 邮政储蓄银行
-        PostSavBankOfChinaServer postSavBankOfChinaServer = new PostSavBankOfChinaServer();
-        postSavBankOfChinaServer.start();
+//        PostSavBankOfChinaServer postSavBankOfChinaServer = new PostSavBankOfChinaServer();
+//        postSavBankOfChinaServer.start();
 
         // 中国招商银行
 //        ChinaMerchBankServer chinaMerchBankServer = new ChinaMerchBankServer();
@@ -27,7 +27,7 @@ public class Main {
 
 
         // 中国建设银行
-//        ChinaConstructBankServer chinaConstructBankServer = new ChinaConstructBankServer();
-//        chinaConstructBankServer.start();
+        ChinaConstructBankServer chinaConstructBankServer = new ChinaConstructBankServer();
+        chinaConstructBankServer.start();
     }
 }
