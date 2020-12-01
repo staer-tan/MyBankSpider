@@ -34,9 +34,9 @@ public class BankOfChinaServer {
         // 若本地已有数据，则无需爬虫
         if (!newFile.exists()) {
             // 爬取银行数据至本地文件
-//        URL[] urls = getBOCUrl();
-//        String[] allHtml = processGetStrHtml(urls);
-//        BankOfChinaServer.parseBOCHtml(allHtml);
+        URL[] urls = getBOCUrl();
+        String[] allHtml = processGetStrHtml(urls);
+        BankOfChinaServer.parseBOCHtml(allHtml);
             System.out.println("爬取本地文件");
         }
 
