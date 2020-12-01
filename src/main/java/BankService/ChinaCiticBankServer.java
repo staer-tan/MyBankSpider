@@ -17,11 +17,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class ChinaCiticBank {
+public class ChinaCiticBankServer {
 
     private static final String SCHEDULE_NAME = "ChinaCiticBankServer";
 
-    public static void main(String[] args) throws Exception {
+    public void start() throws Exception{
         String filePath = new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "ChinaCiticBankData";
         File newFile = new File(filePath);
         if(!newFile.exists()){

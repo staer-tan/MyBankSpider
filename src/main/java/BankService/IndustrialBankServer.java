@@ -21,7 +21,7 @@ public class IndustrialBankServer {
 
     private static final String SCHEDULE_NAME = "IndustrialBankServer";
 
-    public static void main(String[] args) throws Exception{
+    public void start() throws Exception{
         String filePath = new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "IndustrialBankData";
         File newFile = new File(filePath);
         if(!newFile.exists()){

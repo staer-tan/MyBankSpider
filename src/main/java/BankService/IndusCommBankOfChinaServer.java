@@ -22,7 +22,7 @@ public class IndusCommBankOfChinaServer {
     public static final int ALL_PAGES = 335;
     private static final String SCHEDULE_NAME = "IndusCommBankOfChinaServer";
 
-    public static void main(String[] args) throws Exception{
+    public void start() throws Exception{
         String filePath = new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "IndusCommBankOfChinaData";
         File newFile = new File(filePath);
         if(!newFile.exists()){
