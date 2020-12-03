@@ -17,6 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+
+/**
+ * 中信银行数据服务
+ */
 public class ChinaCiticBankServer {
 
     private static final String SCHEDULE_NAME = "ChinaCiticBankServer";
@@ -25,15 +29,20 @@ public class ChinaCiticBankServer {
         String filePath = new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "ChinaCiticBankData";
         File newFile = new File(filePath);
         if(!newFile.exists()){
-            URL[] urls = getIBUrl();
+            URL[] urls = getCCBUrl();
             String[] allHtml = processGetStrHtml(urls);
-            parseBOCHtml();
+            parseCCBHtml();
         }
 
         parseCCBLocalFile(filePath);
     }
 
-    public static URL[] getIBUrl() throws Exception {
+    /**
+     * 获取中信银行URL
+     * @return
+     * @throws Exception
+     */
+    public static URL[] getCCBUrl() throws Exception {
         URL urls[] = new URL[1];
         urls[0] = new URL("http://www.ecitic.com/xml/info/yinhang.xml");
         return urls;
@@ -45,7 +54,11 @@ public class ChinaCiticBankServer {
         return strHtml;
     }
 
-    public static void parseBOCHtml() throws Exception {
+    /**
+     * 解析中信银行的XMl文件
+     * @throws Exception
+     */
+    public static void parseCCBHtml() throws Exception {
 
         File destinationCCBFile = FileUtil.createEmptyFile(new URL(FileUtil.getPrefix("ProcessorData")).getPath(), "IndustrialBankData");
         RandomAccessFile randomAccessFile_write = new RandomAccessFile(destinationCCBFile, "rw");

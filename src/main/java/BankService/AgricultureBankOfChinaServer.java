@@ -24,6 +24,10 @@ public class AgricultureBankOfChinaServer {
 
     public static final String SCHEDULE_NAME = "AgricultureBankOfChinaServer";
 
+    /**
+     * 农行数据调用入口
+     * @throws Exception
+     */
     public void start() throws Exception{
         String filePath = new URL(FileUtil.getPrefix("ProcessorData")).getPath() + "AgricultureBankOfChinaData";
         File newFile = new File(filePath);

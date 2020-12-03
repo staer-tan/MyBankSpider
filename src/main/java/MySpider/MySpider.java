@@ -59,27 +59,6 @@ public class MySpider {
 
     }
 
-    public void start() throws Exception{
-        System.out.println("Main file start work!");
-        init();
-
-        while(scheduleQueue.size() > 0) {
-            downloader.reset(scheduleQueue.nextURL());
-            File downloadFile = downloader.run();
-            // File tempFile = processor.parseToFile(downloadFile);
-            // String html = processor.parseToBankFile(downloadFile);
-            // System.out.println(html);
-            // 1. 中国银行(string html)
-            // BankOfChinaServer.parseBOCHtml(html);
-            // 2. 交通银行(string html)
-            // BankOfCommServer.parseBCMHtml(html);
-            if(scheduleQueue.size() >= 1){
-                // 线程间隔时间
-                Thread.sleep(100*60);
-            }
-        }
-    }
-
     public String[] startGetStrHtml() throws Exception{
         System.out.println("Main file start work!");
         init();

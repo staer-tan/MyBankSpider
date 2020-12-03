@@ -36,27 +36,27 @@ public class ChinaConstructBankServer {
              * 1. 步骤1：把所有URL地址放到AllURL中
              */
             // 从省份的URL获取省份码
-//        URL[] provinceCodeUrl = ChinaConstructBankServer.getCCBProvinceCodeUrl();
-//        String[] provinceCodeHtml = processGetStrHtml(provinceCodeUrl);
-//        String[] provinceCode = ChinaConstructBankServer.parseCCBProvinceCodeHtml(provinceCodeHtml);
-//
-//        // 从省份码获取市级URL，得到市级HTML和市级码
-//        URL[] cityCodeUrl = ChinaConstructBankServer.getCCBCityCodeUrl(provinceCode);
-//        String[] cityCodeHtml = processGetStrHtml(cityCodeUrl);
-//        String[] cityCode = ChinaConstructBankServer.parseCCBCityCodeHtml(cityCodeHtml);
-//
-//        // // 从城市的URL获取区县码
-//        URL[] areaCodeUrl = ChinaConstructBankServer.getCCBAreaCodeUrl(cityCode);
-//        String[] areaCodeHtml = processGetStrHtml(areaCodeUrl);
-//        String[] areaCode = ChinaConstructBankServer.parseCCBAreaCodeHtml(areaCodeHtml);
-//        ChinaConstructBankServer.getCCBAllCodeUrl();
+        URL[] provinceCodeUrl = ChinaConstructBankServer.getCCBProvinceCodeUrl();
+        String[] provinceCodeHtml = processGetStrHtml(provinceCodeUrl);
+        String[] provinceCode = ChinaConstructBankServer.parseCCBProvinceCodeHtml(provinceCodeHtml);
+
+        // 从省份码获取市级URL，得到市级HTML和市级码
+        URL[] cityCodeUrl = ChinaConstructBankServer.getCCBCityCodeUrl(provinceCode);
+        String[] cityCodeHtml = processGetStrHtml(cityCodeUrl);
+        String[] cityCode = ChinaConstructBankServer.parseCCBCityCodeHtml(cityCodeHtml);
+
+        // // 从城市的URL获取区县码
+        URL[] areaCodeUrl = ChinaConstructBankServer.getCCBAreaCodeUrl(cityCode);
+        String[] areaCodeHtml = processGetStrHtml(areaCodeUrl);
+        String[] areaCode = ChinaConstructBankServer.parseCCBAreaCodeHtml(areaCodeHtml);
+        ChinaConstructBankServer.getCCBAllCodeUrl();
 
             /**
              * 2. 步骤2：从文件解析URL进行爬取
              */
-//        URL[] allUrlFromFile = ChinaConstructBankServer.getCCBAllCodeUrlFromFile();
-//        String[] allHtml = processGetStrHtml(allUrlFromFile);
-//        parseAllUrl(allHtml);
+        URL[] allUrlFromFile = ChinaConstructBankServer.getCCBAllCodeUrlFromFile();
+        String[] allHtml = processGetStrHtml(allUrlFromFile);
+        parseAllUrl(allHtml);
         }
 
         ChinaConstructBankServer.parseCCBCLocalFile(filePath);

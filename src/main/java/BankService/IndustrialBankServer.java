@@ -17,6 +17,9 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 import java.util.Map;
 
+/**
+ * 兴业银行(IBC)数据服务
+ */
 public class IndustrialBankServer {
 
     private static final String SCHEDULE_NAME = "IndustrialBankServer";

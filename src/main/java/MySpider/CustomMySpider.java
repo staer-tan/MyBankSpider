@@ -29,7 +29,7 @@ public class CustomMySpider {
                 executorService.submit(() -> {
                     try {
                         MySpider mySpider =  MySpiderFactory.getBankDataSpiderServiceForTheads(url, schedule_name);
-                        mySpider.start();
+                        mySpider.startGetStrHtml();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
